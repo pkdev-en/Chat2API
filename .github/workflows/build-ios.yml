@@ -1,0 +1,60 @@
+# --- .github/workflows/build-ios.yml ---
+# đặt ở ROOT repo, không phải trong ios/
+name: Build iOS IPA (Unsigned)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Resolve Swift package
+        working-directory: ios
+        run: swift package resolve
+
+      - name: Generate Xcode project from Package.swift
+        working-directory: ios
+        run: swift package generate-xcodeproj
+
+      - name: Build & Archive (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild archive \
+            -project Chat2API_iOS.xcodeproj \
+            -scheme Chat2API_iOS \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/Chat2API.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+
+      - name: Package IPA
+        run: |
+          APP=$(find $RUNNER_TEMP/Chat2API.xcarchive \
+            -name "*.app" -maxdepth 4 | head -1)
+          mkdir -p $RUNNER_TEMP/Payload
+          cp -r "$APP" $RUNNER_TEMP/Payload/
+          cd $RUNNER_TEMP
+          zip -r Chat2API-unsigned.ipa Payload/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chat2API-iOS-${{ github.sha }}
+          path: $RUNNER_TEMP/Chat2API-unsigned.ipa
+          retention-days: 14
