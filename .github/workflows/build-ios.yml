@@ -44,33 +44,22 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE_SPECIFIER=""
 
-
-
-            
-      - name: Check archive contents
+      - name: Debug archive
         run: |
-          echo "=== Archive structure ==="
+          echo "=== .app dirs ==="
+          find $RUNNER_TEMP/Chat2API.xcarchive -name "*.app" -type d
+          echo "=== all files ==="
           find $RUNNER_TEMP/Chat2API.xcarchive -type f | head -50
-          echo "=== Runner temp ==="
-          ls $RUNNER_TEMP/
-      
-
 
       - name: Package IPA
         run: |
           APP=$(find $RUNNER_TEMP/Chat2API.xcarchive \
-            -name "*.app" -maxdepth 4 | head -1)
+            -name "*.app" -type d | head -1)
+          echo "APP=$APP"
           mkdir -p $RUNNER_TEMP/Payload
           cp -r "$APP" $RUNNER_TEMP/Payload/
           zip -r $RUNNER_TEMP/Chat2API-unsigned.ipa $RUNNER_TEMP/Payload/
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Chat2API-iOS-${{ github.sha }}
-          path: $RUNNER_TEMP/Chat2API-unsigned.ipa
-          retention-days: 14
-
+          ls -lh $RUNNER_TEMP/Chat2API-unsigned.ipa
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
