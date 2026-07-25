@@ -62,8 +62,15 @@ jobs:
             -name "*.app" -maxdepth 4 | head -1)
           mkdir -p $RUNNER_TEMP/Payload
           cp -r "$APP" $RUNNER_TEMP/Payload/
-          cd $RUNNER_TEMP
-          zip -r Chat2API-unsigned.ipa Payload/
+          zip -r $RUNNER_TEMP/Chat2API-unsigned.ipa $RUNNER_TEMP/Payload/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chat2API-iOS-${{ github.sha }}
+          path: $RUNNER_TEMP/Chat2API-unsigned.ipa
+          retention-days: 14
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
