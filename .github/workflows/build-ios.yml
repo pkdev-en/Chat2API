@@ -1,5 +1,4 @@
 # --- .github/workflows/build-ios.yml ---
-# đặt ở ROOT repo, không phải trong ios/
 name: Build iOS IPA (Unsigned)
 
 on:
@@ -21,21 +20,16 @@ jobs:
       - name: Select Xcode 16
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Resolve Swift package
+      - name: Resolve dependencies
         working-directory: ios
         run: swift package resolve
-
-      - name: Generate Xcode project from Package.swift
-        working-directory: ios
-        run: swift package generate-xcodeproj
 
       - name: Build & Archive (unsigned)
         working-directory: ios
         run: |
           xcodebuild archive \
-            -project Chat2API_iOS.xcodeproj \
             -scheme Chat2API_iOS \
-            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
             -configuration Release \
             -archivePath $RUNNER_TEMP/Chat2API.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
