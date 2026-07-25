@@ -42,6 +42,16 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE_SPECIFIER=""
 
+            
+      - name: Check archive contents
+        run: |
+          echo "=== Archive structure ==="
+          find $RUNNER_TEMP/Chat2API.xcarchive -type f | head -50
+          echo "=== Runner temp ==="
+          ls $RUNNER_TEMP/
+      
+
+
       - name: Package IPA
         run: |
           APP=$(find $RUNNER_TEMP/Chat2API.xcarchive \
