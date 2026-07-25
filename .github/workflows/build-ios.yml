@@ -53,13 +53,19 @@ jobs:
 
       - name: Package IPA
         run: |
-          APP=$(find $RUNNER_TEMP/Chat2API.xcarchive \
-            -name "*.app" -type d | head -1)
-          echo "APP=$APP"
-          mkdir -p $RUNNER_TEMP/Payload
-          cp -r "$APP" $RUNNER_TEMP/Payload/
-          zip -r $RUNNER_TEMP/Chat2API-unsigned.ipa $RUNNER_TEMP/Payload/
-          ls -lh $RUNNER_TEMP/Chat2API-unsigned.ipa
+          APP="/Users/runner/work/_temp/Chat2API.xcarchive/Products/Applications/Chat2API_iOS.app"
+          mkdir -p /Users/runner/work/_temp/Payload
+          cp -r "$APP" /Users/runner/work/_temp/Payload/
+          cd /Users/runner/work/_temp
+          zip -r Chat2API-unsigned.ipa Payload/
+          ls -lh /Users/runner/work/_temp/Chat2API-unsigned.ipa
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chat2API-iOS-${{ github.sha }}
+          path: /Users/runner/work/_temp/Chat2API-unsigned.ipa
+          retention-days: 14
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
